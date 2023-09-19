@@ -10,7 +10,6 @@ from langchain.agents.agent_toolkits import (
     VectorStoreInfo
 )
 
-
 os.environ['OPENAI_API_KEY'] = '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'
 
 llm = OpenAI(temperature=0.1, verbose=True)
@@ -131,4 +130,3 @@ if prompt:
 with st.expander('Document Similarity Search'):
     search = store.similarity_search_with_score(prompt)
     st.write(search[0][0].page_content)
-
