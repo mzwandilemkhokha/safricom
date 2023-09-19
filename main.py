@@ -10,7 +10,7 @@ from langchain.agents.agent_toolkits import (
     VectorStoreInfo
 )
 
-os.environ['OPENAI_API_KEY'] = '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'
+os.environ['OPENAI_API_KEY'] = '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'
 
 llm = OpenAI(temperature=0.1, verbose=True)
 embeddings = OpenAIEmbeddings()
