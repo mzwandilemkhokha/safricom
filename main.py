@@ -10,12 +10,13 @@ from langchain.agents.agent_toolkits import (
     VectorStoreInfo
 )
 
-os.environ['OPENAI_API_KEY'] = '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'
+
+os.environ['OPENAI_API_KEY'] = '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'
 
 llm = OpenAI(temperature=0.1, verbose=True)
 embeddings = OpenAIEmbeddings()
 
-loader = PyPDFLoader('./annualreport2.pdf')
+loader = PyPDFLoader('./NadcoReport.pdf')
 pages = loader.load_and_split()
 store = Chroma.from_documents(pages, embeddings, collection_name='annualreport2')
 
@@ -34,8 +35,8 @@ agent_executor = create_vectorstore_agent(
 )
 
 # Streamlit UI setup
-st.title('Safaricom GPT Query Assitance')
-prompt = st.text_input('Ask Me Anything About Safaricom related')
+st.title('National Dialog Committee November 2023')
+prompt = st.text_input('Ask Me Anything About the National Dialog Committee Nov 2023')
 
 def add_bg_from_url():
     st.markdown(
@@ -44,12 +45,12 @@ def add_bg_from_url():
          @import url('https://fonts.googleapis.com/css2?family=Mr+Dafoe&display=swap');
         @import url('https://fonts.googleapis.com/css2?family=Exo:wght@900&display=swap');
          .stApp {{
-             background-image: linear-gradient(45deg, #FC466B, #3F5EFB);
+             background-image: linear-gradient(45deg, #363535,#dedcdc, #363535);
              background-attachment: fixed;
              background-size: cover
          }}
          h1 {{text-align: center;
-    color: mistyrose;
+    color: red;
     font-family: Arial, Helvetica, sans-serif;
     opacity: 0.7;
     font-size: 0.5rem;
@@ -77,7 +78,7 @@ def add_bg_from_url():
   text-align: center;}}
  /* Container style with flexbox layout to center the grid */
         
-         p {{color: #FFFFFF;
+         p {{color: #0f0f0f;
   font-family: Arial, Helvetica, sans-serif;
   opacity: 0.7;
   font-size: 28px;
@@ -106,7 +107,7 @@ add_bg_from_url()
 
 from PIL import Image
 
-image_path = "./equity.jpg"  # Replace this with your image file path
+image_path = "./nadco.jpg"  # Replace this with your image file path
 
 # Set the desired width for the image (in pixels)
 desired_width = 100
@@ -120,7 +121,7 @@ resized_image = image.resize((100, 50))
 
 # Use the st.beta_container() context manager to center the image
 with st.container():
-     st.image(image_path, caption='Equity Bank', width=200)
+     st.image(image_path, caption='Nadco', width=200)
    # st.image(image_path, caption='Image', use_column_width=True, width=desired_width)
 
 if prompt:
@@ -130,3 +131,4 @@ if prompt:
 with st.expander('Document Similarity Search'):
     search = store.similarity_search_with_score(prompt)
     st.write(search[0][0].page_content)
+
