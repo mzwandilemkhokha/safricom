@@ -11,7 +11,7 @@ from langchain.agents.agent_toolkits import (
 )
 
 
-os.environ['OPENAI_API_KEY'] = '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'
+os.environ['OPENAI_API_KEY'] = ''
 
 llm = OpenAI(temperature=0.1, verbose=True)
 embeddings = OpenAIEmbeddings()
