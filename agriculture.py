@@ -1,0 +1,138 @@
+import os
+from langchain.llms import OpenAI
+from langchain.embeddings import OpenAIEmbeddings
+import streamlit as st
+from langchain.document_loaders import PyPDFLoader
+from langchain.vectorstores import Chroma
+from langchain.agents.agent_toolkits import (
+    create_vectorstore_agent,
+    VectorStoreToolkit,
+    VectorStoreInfo
+)
+
+
+os.environ['OPENAI_API_KEY'] = ''
+
+
+# Streamlit UI setup
+st.title('Sprout Farming Search')
+option = st.selectbox('What raw materials would you like to information about',('Kales', 'Irish Potatoes', 'Honey Products','Ground nuts', 'Tomatoes', 'Soya Beans', 'Sunflower', 'Local and improved chicken', 'Sorghum', 'Rice', 'Maize', 'Crop Varierty', 'Pyrethrum', 'Onions'))
+prompt = st.text_input('Ask Me Anything Sprout farming related')
+
+
+#document variables declaration
+llm = OpenAI(temperature=0.1, verbose=True)
+embeddings = OpenAIEmbeddings()
+loader = PyPDFLoader('./'+option+'.pdf')
+pages = loader.load_and_split()
+store = Chroma.from_documents(pages, embeddings, collection_name='annualreport2')
+
+vectorstore_info = VectorStoreInfo(
+    name="annual_report",
+    description="a telco and tech annual report as a pdf",
+    vectorstore=store
+)
+
+toolkit = VectorStoreToolkit(vectorstore_info=vectorstore_info)
+
+agent_executor = create_vectorstore_agent(
+    llm=llm,
+    toolkit=toolkit,
+    verbose=True
+)
+
+                      
+def add_bg_from_url():
+    st.markdown(
+         f"""
+         <style>
+         @import url('https://fonts.googleapis.com/css2?family=Mr+Dafoe&display=swap');
+        @import url('https://fonts.googleapis.com/css2?family=Exo:wght@900&display=swap');
+         .stApp {{
+             background-image: linear-gradient(45deg, #363535,#dedcdc, #363535);
+             background-attachment: fixed;
+             background-size: cover
+         }}
+         h1 {{text-align: center;
+    color: red;
+    font-family: Arial, Helvetica, sans-serif;
+    opacity: 0.7;
+    font-size: 0.5rem;
+    margin-top: 0;
+    margin-bottom: 60px;
+    text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.2);
+    font-size: 50px;}}
+         h2 {{font-family: Arial, Helvetica, sans-serif;
+  margin: 0;
+  font-size: 2.5em;
+  margin-top: -0.6em;
+  color: white;
+  text-shadow: 0 0 0.05em #fff, 0 0 0.2em #fe05e1, 0 0 0.3em #fe05e1;
+  margin-left: auto;
+  margin-right: auto;
+  text-align: center;}}
+         h3 {{font-family: Arial, Helvetica, sans-serif;
+  margin: 0;
+  font-size: 1.0em;
+  margin-top: -0.6em;
+  color: white;
+  text-shadow: 0 0 0.05em #fff, 0 0 0.2em #fe05e1, 0 0 0.3em #fe05e1;
+  margin-left: auto;
+  margin-right: auto;
+  text-align: center;}}
+ /* Container style with flexbox layout to center the grid */
+        
+         p {{color: #0f0f0f;
+  font-family: Arial, Helvetica, sans-serif;
+  opacity: 0.7;
+  font-size: 28px;
+  margin-top: 0;
+  text-align: left;
+  margin-bottom: 60px;
+  text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.2);}}
+        [data-testid=stSidebar] {{background-color: rgba(255, 255, 255, 0.301);
+                                  border-left: 1px solid white;
+            border-top: 1px solid white;
+            backdrop-filter: blur(20px);
+            box-shadow: 20px 20px 40px -6px rgba(0,0,0,0.2);}}
+            transition: all 0.2s ease-in-out;
+            margin-left: auto;
+            margin-right: auto;
+            color: rgb(55, 58, 58);
+         font-family: Arial, Helvetica, sans-serif;
+         opacity: 0.7;
+            text-shadow: 2px 2px 4px rgba(0,0,0,0.2);
+         </style>
+         """,
+         unsafe_allow_html=True
+     )
+
+add_bg_from_url()
+
+from PIL import Image
+
+image_path = "./nadco.jpg"  # Replace this with your image file path
+
+# Set the desired width for the image (in pixels)
+desired_width = 100
+
+image = Image.open(image_path)
+
+# Resize the image to the desired width while maintaining the aspect ratio
+aspect_ratio = image.width / image.height
+desired_height = int(desired_width / aspect_ratio)
+resized_image = image.resize((100, 50))
+
+# Use the st.beta_container() context manager to center the image
+with st.container():
+     st.image(image_path, caption='Nadco', width=200)
+   # st.image(image_path, caption='Image', use_column_width=True, width=desired_width)
+
+if prompt:
+    response = agent_executor.run(prompt)
+    st.write(response)
+
+with st.expander('Document Similarity Search'):
+    search = store.similarity_search_with_score(prompt)
+    st.write(search[0][0].page_content)
+
